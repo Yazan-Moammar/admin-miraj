@@ -4,171 +4,175 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Miraç Admin — لوحة التحكم</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<!-- مكتبة تصدير PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
-  --bg: #f4f6f9; --card: #ffffff; --gold: #b89558; --gold-hover: #a07d45;
-  --txt: #2c3e50; --muted: #7f8c8d; --border: #e1e8ed; --red: #e74c3c; --grn: #27ae60;
-  --shadow: 0 10px 30px rgba(0,0,0,0.05);
+  --bg: #f4f6f9; --card: #ffffff; --primary: #0f172a; --accent: #3b82f6;
+  --gold: #d97706; --red: #ef4444; --green: #10b981; --border: #e2e8f0;
+  --text: #334155; --muted: #64748b; --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-body { background: var(--bg); color: var(--txt); min-height: 100vh; }
+body { background: var(--bg); color: var(--text); min-height: 100vh; }
 
 /* Login */
-#loginScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); }
-.login-box { background: var(--card); border-radius: 20px; padding: 40px; width: 100%; max-width: 400px; box-shadow: var(--shadow); text-align: center; border-top: 5px solid var(--gold); }
-.login-box h1 { font-size: 26px; font-weight: 900; margin-bottom: 5px; color: var(--txt); }
-.login-box p { color: var(--muted); font-size: 14px; margin-bottom: 25px; }
-.login-box input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 14px; background: #f9f9f9; transition: 0.3s; }
-.login-box input:focus { outline: none; border-color: var(--gold); background: #fff; }
-.login-box button { width: 100%; padding: 14px; background: var(--gold); color: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; }
-.login-box button:hover { background: var(--gold-hover); }
-.login-err { color: var(--red); font-size: 13px; margin-top: 15px; font-weight: 700; min-height: 20px; }
+#loginScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--primary); }
+.login-box { background: var(--card); border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); text-align: center; }
+.login-box h1 { font-size: 24px; font-weight: 900; color: var(--primary); margin-bottom: 20px; }
+.login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; background: #f8fafc; }
+.login-box button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.2s; }
+.login-box button:hover { background: #2563eb; }
+.login-err { color: var(--red); font-size: 13px; margin-top: 10px; font-weight: 700; }
 
 /* Dashboard */
-#dashboard { display: none; animation: fadeIn 0.5s; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.topbar { background: var(--card); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); position: sticky; top: 0; z-index: 100; }
-.brand { font-size: 22px; font-weight: 900; color: var(--txt); }
-.brand span { color: var(--gold); }
-.btn-logout { background: #fdf2f2; color: var(--red); border: 1px solid #fadbd8; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.3s; }
-.btn-logout:hover { background: var(--red); color: #fff; }
+#dashboard { display: none; }
+.topbar { background: var(--card); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
+.topbar h1 { font-size: 20px; font-weight: 900; color: var(--primary); }
+.topbar h1 span { color: var(--accent); }
+.logout-btn { padding: 8px 16px; background: #fee2e2; color: var(--red); border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.logout-btn:hover { background: var(--red); color: white; }
 
 .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-.tabs { display: flex; background: var(--card); border-radius: 12px; padding: 5px; margin-bottom: 25px; box-shadow: var(--shadow); gap: 5px; }
-.tab-btn { flex: 1; padding: 15px; border: none; background: transparent; font-family: inherit; font-size: 16px; font-weight: 700; color: var(--muted); border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.tab-btn.active { background: var(--gold); color: #fff; box-shadow: 0 4px 10px rgba(184,149,88,0.3); }
-
-.view-section { display: none; animation: slideUp 0.4s ease; }
-.view-section.active { display: block; }
-@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* Stats */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
-.stat-card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow); text-align: center; border-bottom: 3px solid var(--gold); }
-.stat-card .val { font-size: 28px; font-weight: 900; color: var(--txt); }
-.stat-card .lbl { font-size: 13px; color: var(--muted); font-weight: 700; }
+.tabs { display: flex; background: var(--card); border-radius: 12px; padding: 6px; gap: 6px; margin-bottom: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+.tab-btn { flex: 1; padding: 12px; border: none; background: transparent; font-weight: 700; font-size: 15px; color: var(--muted); border-radius: 8px; cursor: pointer; transition: 0.2s; }
+.tab-btn.active { background: var(--primary); color: white; }
+.view { display: none; animation: fadeIn 0.3s; }
+.view.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Toolbar */
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
 .search-box { flex: 1; min-width: 250px; position: relative; }
-.search-box input { width: 100%; padding: 12px 15px 12px 40px; border: 1px solid var(--border); border-radius: 10px; font-family: inherit; background: var(--card); }
-.search-box::before { content: '🔍'; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); }
-.btn { padding: 11px 20px; border-radius: 10px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-.btn-gold { background: var(--gold); color: #fff; }
-.btn-red { background: var(--red); color: #fff; }
-.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--txt); }
+.search-box input { width: 100%; padding: 12px 40px 12px 15px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; }
+.search-box::before { content: '🔍'; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; font-family: inherit; }
+.btn-pdf { background: #fef2f2; color: var(--red); border: 1px solid #fca5a5; }
+.btn-pdf:hover { background: var(--red); color: white; }
+.btn-add { background: var(--primary); color: white; }
+.btn-add:hover { background: #1e293b; }
 
 /* Orders */
-.order-card { background: var(--card); border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 15px; border: 1px solid var(--border); overflow: hidden; }
-.order-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #fafafa; transition: 0.2s; }
-.order-header:hover { background: #f0f0f0; }
-.order-header .o-id { font-weight: 900; color: var(--gold); }
-.order-header .o-total { font-weight: 900; }
-.order-body { display: none; padding: 20px; border-top: 1px solid var(--border); }
-.order-card.open .order-body { display: block; }
-.customer-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 10px; }
-.info-item strong { color: var(--muted); font-size: 12px; display: block; margin-bottom: 3px; }
-.items-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-.item-row { display: flex; align-items: center; gap: 15px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; }
-.item-row img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
-.btn-wa { background: #25d366; color: #fff; text-decoration: none; display: inline-flex; padding: 10px 20px; border-radius: 8px; font-weight: 700; }
+.order-card { background: var(--card); border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 16px; border: 1px solid var(--border); overflow: hidden; }
+.order-header { background: #f1f5f9; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+.order-id { font-weight: 900; color: var(--primary); }
+.order-date { font-size: 12px; color: var(--muted); }
+.order-body { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.order-details-col p { margin-bottom: 10px; font-size: 14px; }
+.order-details-col p strong { color: var(--muted); font-size: 12px; display: block; }
+.order-items-col { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed var(--border); }
+.item-line { display: flex; justify-content: space-between; font-size: 13px; padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.item-line:last-child { border: none; margin: 0; padding: 0; }
+.order-footer { padding: 15px 20px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.total-box { font-size: 16px; font-weight: 900; color: var(--green); }
+.action-btns { display: flex; gap: 10px; }
+.wa-btn { padding: 8px 16px; background: #25d366; color: white; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; border: none; cursor: pointer; }
+.wa-btn:hover { background: #128c7e; }
+.del-btn { padding: 8px 16px; background: #fee2e2; color: var(--red); border: 1px solid #fca5a5; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.del-btn:hover { background: var(--red); color: white; }
 
 /* Products */
-.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-.product-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; flex-direction: column; transition: 0.3s; }
-.product-card:hover { transform: translateY(-5px); }
-.p-img { width: 100%; height: 200px; object-fit: cover; }
-.p-info { padding: 15px; flex: 1; display: flex; flex-direction: column; }
-.p-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
-.p-price { font-size: 18px; font-weight: 900; color: var(--gold); margin-bottom: 12px; }
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+.product-card { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border); }
+.p-img { width: 100%; height: 180px; object-fit: cover; border-bottom: 1px solid var(--border); }
+.p-info { padding: 15px; }
+.p-title { font-weight: 800; margin-bottom: 5px; color: var(--primary); }
+.p-price { color: var(--gold); font-weight: 900; margin-bottom: 10px; }
 .p-stock { font-size: 12px; font-weight: 700; margin-bottom: 15px; }
-.p-stock.in { color: var(--grn); }
+.p-stock.in { color: var(--green); }
 .p-stock.out { color: var(--red); }
-.p-actions { display: flex; gap: 8px; margin-top: auto; }
-.p-actions button { flex: 1; padding: 8px; border: none; border-radius: 8px; font-family: inherit; font-weight: 700; cursor: pointer; }
-.btn-edit { background: #f0f3f5; color: var(--txt); }
-.btn-del { background: #fdf2f2; color: var(--red); }
+.p-actions { display: flex; gap: 10px; }
+.p-actions button { flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.2s; }
+.btn-edit { background: #e0f2fe; color: #0284c7; }
+.btn-edit:hover { background: #0284c7; color: white; }
+.btn-del-p { background: #fee2e2; color: var(--red); }
+.btn-del-p:hover { background: var(--red); color: white; }
 
-/* Reminders Table */
-.table-responsive { overflow-x: auto; background: var(--card); border-radius: 12px; box-shadow: var(--shadow); }
+/* Table */
+.table-wrap { background: var(--card); border-radius: 12px; box-shadow: var(--shadow); overflow-x: auto; border: 1px solid var(--border); }
 table { width: 100%; border-collapse: collapse; text-align: right; }
-th { background: #f8f9fa; padding: 15px; color: var(--muted); border-bottom: 1px solid var(--border); }
-td { padding: 15px; border-bottom: 1px solid var(--border); }
+th { background: #f8fafc; padding: 15px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
 /* Modal */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
 .modal.open { display: flex; }
-.modal-content { background: var(--card); border-radius: 16px; padding: 30px; width: 100%; max-width: 600px; animation: popIn 0.3s; }
-@keyframes popIn { from { transform: scale(0.9); } to { transform: scale(1); } }
+.modal-content { background: var(--card); border-radius: 16px; padding: 30px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+.modal-content h2 { margin-bottom: 20px; color: var(--primary); }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group.full { grid-column: 1 / -1; }
 .form-group label { font-size: 13px; font-weight: 700; color: var(--muted); }
 .form-group input, .form-group select, .form-group textarea { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+.checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+.checkbox-group input { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
+.checkbox-group label { font-size: 15px; font-weight: 700; color: var(--primary); cursor: pointer; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
-.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--txt); color: #fff; padding: 12px 24px; border-radius: 8px; font-weight: 700; z-index: 2000; transition: 0.3s; }
-.toast.show { transform: translateX(-50%) translateY(0); }
+.btn-cancel { padding: 10px 20px; background: #f1f5f9; color: var(--muted); border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.btn-save { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+
+@media (max-width: 768px) {
+  .order-body { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .tabs { flex-direction: column; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .action-btns { justify-content: space-between; width: 100%; }
+}
 </style>
 </head>
 <body>
 
 <div id="loginScreen">
   <div class="login-box">
-    <h1>Miraç | معراج</h1>
-    <p>لوحة التحكم - يرجى تسجيل الدخول</p>
+    <h1>Miraç Admin</h1>
     <input type="email" id="adminEmail" placeholder="البريد الإلكتروني">
     <input type="password" id="adminPass" placeholder="كلمة المرور">
-    <button id="loginBtn" onclick="loginAdmin()">دخول</button>
+    <button onclick="loginAdmin()" id="loginBtn">تسجيل الدخول</button>
     <div class="login-err" id="loginError"></div>
   </div>
 </div>
 
 <div id="dashboard">
   <div class="topbar">
-    <div class="brand">Miraç <span>Admin</span></div>
-    <button class="btn-logout" onclick="logoutAdmin()">تسجيل الخروج 🚪</button>
+    <h1>لوحة <span>معراج</span></h1>
+    <button class="logout-btn" onclick="logoutAdmin()">تسجيل الخروج 🚪</button>
   </div>
-
+  
   <div class="container">
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('orders', this)">📋 الطلبات أولاً</button>
+      <button class="tab-btn active" onclick="switchTab('orders', this)">📋 الطلبات</button>
       <button class="tab-btn" onclick="switchTab('products', this)">📦 المنتجات</button>
       <button class="tab-btn" onclick="switchTab('reminders', this)">🔔 التذكيرات</button>
     </div>
 
     <!-- الطلبات -->
-    <div id="view-orders" class="view-section active">
-      <div class="stats-grid">
-        <div class="stat-card"><div class="val" id="statTotalOrders">0</div><div class="lbl">إجمالي الطلبات</div></div>
-        <div class="stat-card"><div class="val" id="statNewOrders">0</div><div class="lbl">طلبات جديدة</div></div>
-        <div class="stat-card"><div class="val" id="statSales">0 ₺</div><div class="lbl">إجمالي المبيعات</div></div>
-      </div>
+    <div id="view-orders" class="view active">
       <div class="toolbar">
         <div class="search-box"><input type="text" id="orderSearch" placeholder="ابحث بالاسم أو رقم الطلب..." onkeyup="renderOrders()"></div>
-        <button class="btn btn-red" onclick="exportPDF()">📄 تصدير PDF</button>
+        <button class="btn btn-pdf" onclick="exportPDF()">📄 تصدير PDF</button>
       </div>
       <div id="ordersList"></div>
     </div>
 
     <!-- المنتجات -->
-    <div id="view-products" class="view-section">
+    <div id="view-products" class="view">
       <div class="toolbar">
         <div class="search-box"><input type="text" id="productSearch" placeholder="ابحث عن منتج..." onkeyup="renderProducts()"></div>
-        <button class="btn btn-gold" onclick="openProductModal()">➕ إضافة منتج</button>
+        <button class="btn btn-add" onclick="openProductModal()">➕ إضافة منتج جديد</button>
       </div>
       <div class="products-grid" id="productsGrid"></div>
     </div>
 
     <!-- التذكيرات -->
-    <div id="view-reminders" class="view-section">
-      <div class="table-responsive">
+    <div id="view-reminders" class="view">
+      <div class="table-wrap">
         <table>
-          <thead><tr><th>المنتج المطلوب</th><th>البريد الإلكتروني</th><th>التاريخ</th></tr></thead>
+          <thead><tr><th>المنتج المطلوب</th><th>وسيلة التواصل</th><th>التاريخ</th></tr></thead>
           <tbody id="remindersBody"></tbody>
         </table>
       </div>
@@ -176,30 +180,34 @@ td { padding: 15px; border-bottom: 1px solid var(--border); }
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal إضافة/تعديل منتج -->
 <div class="modal" id="productModal">
   <div class="modal-content">
-    <h2 id="modalTitle" style="margin-bottom:20px;">إضافة منتج</h2>
+    <h2 id="modalTitle">إضافة منتج</h2>
     <form id="productForm" onsubmit="saveProduct(event)">
       <input type="hidden" id="editId">
       <div class="form-grid">
         <div class="form-group"><label>الاسم (تركي) *</label><input type="text" id="pNameTr" required></div>
         <div class="form-group"><label>الاسم (عربي)</label><input type="text" id="pNameAr"></div>
         <div class="form-group"><label>الاسم (إنجليزي)</label><input type="text" id="pNameEn"></div>
-        <div class="form-group"><label>القسم</label><select id="pCategory"><option value="rings">خواتم</option><option value="bracelets">أساور</option><option value="necklaces">ميداليات</option><option value="stickers">ملصقات</option><option value="pins">دبابيس</option></select></div>
+        <div class="form-group"><label>القسم</label><select id="pCategory"><option value="rings">خواتم</option><option value="bracelets">أساور</option><option value="necklaces">ميداليات</option><option value="other">أخرى</option></select></div>
         <div class="form-group"><label>السعر ₺ *</label><input type="number" id="pPrice" step="0.01" required></div>
         <div class="form-group"><label>الخصم %</label><input type="number" id="pDiscount" value="0"></div>
         <div class="form-group full"><label>رابط الصورة</label><input type="url" id="pImage"></div>
-        <div class="form-group full"><label>الوصف</label><textarea id="pDesc"></textarea></div>
+        <div class="form-group full"><label>الوصف</label><textarea id="pDesc" rows="2"></textarea></div>
+        
+        <div class="form-group full checkbox-group">
+          <input type="checkbox" id="pInStock" checked>
+          <label for="pInStock">المنتج متوفر في المخزون حالياً</label>
+        </div>
       </div>
       <div class="modal-actions">
-        <button type="button" class="btn btn-outline" onclick="closeModal()">إلغاء</button>
-        <button type="submit" class="btn btn-gold" id="saveBtn">حفظ</button>
+        <button type="button" class="btn-cancel" onclick="closeModal()">إلغاء</button>
+        <button type="submit" class="btn-save" id="saveBtn">حفظ</button>
       </div>
     </form>
   </div>
 </div>
-<div class="toast" id="toast"></div>
 
 <script>
 const firebaseConfig = {
@@ -213,23 +221,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-auth.setPersistence(firebase.auth.Auth.Persistence.NONE); // يطلب دخول كل مرة
 
-let allOrders=[], allProducts=[], allReminders=[];
+// يطلب تسجيل الدخول في كل مرة
+auth.setPersistence(firebase.auth.Auth.Persistence.NONE);
 
-function loginAdmin() {
-  const email = document.getElementById('adminEmail').value;
-  const pass = document.getElementById('adminPass').value;
-  const btn = document.getElementById('loginBtn');
-  const err = document.getElementById('loginError');
-  if(!email || !pass) return err.innerText = "أدخل البيانات";
-  btn.innerText = "..."; btn.disabled = true;
-  auth.signInWithEmailAndPassword(email, pass).catch(e => {
-    btn.innerText = "دخول"; btn.disabled = false;
-    err.innerText = "بيانات خاطئة";
-  });
-}
-function logoutAdmin() { auth.signOut(); }
+let allOrders = [], allProducts = [], allReminders = [];
 
 auth.onAuthStateChanged(user => {
   if(user) {
@@ -242,26 +238,36 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+function loginAdmin() {
+  const email = document.getElementById('adminEmail').value;
+  const pass = document.getElementById('adminPass').value;
+  const btn = document.getElementById('loginBtn');
+  btn.innerText = "..."; btn.disabled = true;
+  auth.signInWithEmailAndPassword(email, pass).catch(e => {
+    btn.innerText = "تسجيل الدخول"; btn.disabled = false;
+    document.getElementById('loginError').innerText = "بيانات غير صحيحة";
+  });
+}
+function logoutAdmin() { auth.signOut(); }
+
 function switchTab(id, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('view-' + id).classList.add('active');
 }
 
 function loadData() {
-  db.collection('orders').orderBy('date', 'desc').onSnapshot(s => {
-    allOrders = []; let sales = 0;
-    s.forEach(d => { const x = d.data(); allOrders.push({id:d.id, ...x}); sales += (parseFloat(x.total)||0); });
-    document.getElementById('statTotalOrders').innerText = allOrders.length;
-    document.getElementById('statNewOrders').innerText = allOrders.filter(o=>o.status==='pending').length;
-    document.getElementById('statSales').innerText = sales.toFixed(2) + ' ₺';
+  db.collection('orders').orderBy('createdAt', 'desc').onSnapshot(s => {
+    allOrders = []; s.forEach(d => allOrders.push({id:d.id, ...d.data()}));
     renderOrders();
   });
+
   db.collection('products').orderBy('createdAt', 'desc').onSnapshot(s => {
     allProducts = []; s.forEach(d => allProducts.push({id:d.id, ...d.data()}));
     renderProducts();
   });
+
   db.collection('reminders').orderBy('createdAt', 'desc').onSnapshot(s => {
     allReminders = []; s.forEach(d => allReminders.push({id:d.id, ...d.data()}));
     renderReminders();
@@ -271,57 +277,136 @@ function loadData() {
 function renderOrders() {
   const search = document.getElementById('orderSearch').value.toLowerCase();
   const box = document.getElementById('ordersList');
-  let list = allOrders.filter(o => o.name.toLowerCase().includes(search) || o.id.includes(search));
-  if(!list.length) return box.innerHTML = '<p style="text-align:center;padding:30px;">لا توجد طلبات</p>';
+  let list = allOrders.filter(o => (o.name||'').toLowerCase().includes(search) || o.id.includes(search));
+  
+  if(!list.length) return box.innerHTML = '<p style="text-align:center;padding:30px;color:var(--muted);">لا توجد طلبات</p>';
   
   box.innerHTML = list.map(o => {
-    const date = o.date ? new Date(o.date).toLocaleString('ar-EG') : '';
+    const date = o.createdAt ? new Date(o.createdAt.toDate()).toLocaleString('ar-EG') : '';
     const items = (o.items||[]).map(i => `
-      <div class="item-row">
-        <img src="${i.img||'https://via.placeholder.com/50'}">
-        <div><b>${i.title.ar || i.title.tr || i.title}</b><br><span style="color:var(--gold);">₺ ${i.finalPrice} × ${i.qty}</span></div>
+      <div class="item-line">
+        <span>${i.title.ar || i.title.tr} <b>(x${i.qty})</b></span>
+        <span style="color:var(--gold);font-weight:bold;">₺ ${(i.finalPrice * i.qty).toFixed(2)}</span>
       </div>`).join('');
     const phone = (o.phone||'').replace(/[^0-9]/g, '');
     const wa = `https://wa.me/${phone.startsWith('0')?'9'+phone:phone.startsWith('90')?phone:'90'+phone}`;
+    
     return `
-    <div class="order-card" id="ord-${o.id}">
-      <div class="order-header" onclick="document.getElementById('ord-${o.id}').classList.toggle('open')">
-        <div><span class="o-id">#${o.id.slice(-6).toUpperCase()}</span> <span style="color:var(--muted);font-size:12px;margin-right:10px;">${date}</span></div>
-        <div>${o.name}</div>
-        <div class="o-total">₺ ${o.total}</div>
+    <div class="order-card">
+      <div class="order-header">
+        <div class="order-id">طلب #${o.id.slice(-6).toUpperCase()}</div>
+        <div class="order-date">${date}</div>
       </div>
       <div class="order-body">
-        <div class="customer-info">
-          <div class="info-item"><strong>الهاتف</strong>${o.phone}</div>
-          <div class="info-item"><strong>المدينة</strong>${o.city}</div>
-          <div class="info-item" style="grid-column:1/-1;"><strong>العنوان</strong>${o.address}</div>
+        <div class="order-details-col">
+          <p><strong>الاسم</strong>${o.name}</p>
+          <p><strong>الهاتف</strong><span style="direction:ltr; display:inline-block;">${o.phone}</span></p>
+          <p><strong>العنوان</strong>${o.city} - ${o.address}</p>
+          ${o.notes ? `<p><strong>ملاحظات</strong>${o.notes}</p>` : ''}
         </div>
-        <div class="items-list">${items}</div>
-        <a href="${wa}" target="_blank" class="btn-wa">💬 واتساب</a>
+        <div class="order-items-col">
+          ${items}
+        </div>
+      </div>
+      <div class="order-footer">
+        <div class="total-box">الإجمالي: ₺ ${(o.total||0).toFixed(2)}</div>
+        <div class="action-btns">
+          <a href="${wa}" target="_blank" class="wa-btn">💬 واتساب</a>
+          <button onclick="deleteOrder('${o.id}')" class="del-btn">🗑️ حذف</button>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 
+// --- دالة حذف الطلب ---
+async function deleteOrder(id) {
+  if(confirm("هل أنت متأكد من حذف هذا الطلب نهائياً؟")) {
+    try {
+      await db.collection('orders').doc(id).delete();
+    } catch (error) {
+      alert("حدث خطأ أثناء الحذف: " + error.message);
+    }
+  }
+}
+
+// --- دالة تصدير PDF ---
+function exportPDF() {
+  if(!allOrders.length) return alert("لا توجد طلبات لتصديرها.");
+  
+  // إنشاء عنصر HTML مؤقت لتصميم الجدول
+  const element = document.createElement('div');
+  element.style.cssText = "padding:20px; font-family:'Cairo', sans-serif; direction:rtl; background:#fff; color:#000; width: 1000px;";
+  
+  let html = `
+    <h2 style="text-align:center; color:#0f172a; margin-bottom:20px;">تقرير طلبات معراج</h2>
+    <table style="width:100%; border-collapse:collapse; text-align:right; font-size:12px;">
+      <thead>
+        <tr style="background:#f1f5f9; border-bottom:2px solid #cbd5e1;">
+          <th style="padding:10px; border:1px solid #e2e8f0;">#</th>
+          <th style="padding:10px; border:1px solid #e2e8f0;">الاسم</th>
+          <th style="padding:10px; border:1px solid #e2e8f0;">الهاتف</th>
+          <th style="padding:10px; border:1px solid #e2e8f0;">المدينة</th>
+          <th style="padding:10px; border:1px solid #e2e8f0;">العنوان</th>
+          <th style="padding:10px; border:1px solid #e2e8f0;">المنتجات</th>
+          <th style="padding:10px; border:1px solid #e2e8f0;">الإجمالي (₺)</th>
+          <th style="padding:10px; border:1px solid #e2e8f0;">التاريخ</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  
+  allOrders.forEach((o, idx) => {
+    const date = o.createdAt ? new Date(o.createdAt.toDate()).toLocaleDateString('ar-EG') : '';
+    const itemsStr = (o.items||[]).map(i => `${i.title.ar || i.title.tr} (x${i.qty})`).join(' | ');
+    
+    html += `
+      <tr>
+        <td style="padding:10px; border:1px solid #e2e8f0; text-align:center;">${idx + 1}</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">${o.name}</td>
+        <td style="padding:10px; border:1px solid #e2e8f0; direction:ltr; text-align:right;">${o.phone}</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">${o.city}</td>
+        <td style="padding:10px; border:1px solid #e2e8f0;">${o.address}</td>
+        <td style="padding:10px; border:1px solid #e2e8f0; font-size:11px;">${itemsStr}</td>
+        <td style="padding:10px; border:1px solid #e2e8f0; text-align:center; font-weight:bold; color:#10b981;">${(o.total||0).toFixed(2)}</td>
+        <td style="padding:10px; border:1px solid #e2e8f0; font-size:11px;">${date}</td>
+      </tr>
+    `;
+  });
+  
+  html += `</tbody></table>`;
+  element.innerHTML = html;
+  
+  const opt = {
+    margin: 10,
+    filename: `Miraj_Orders_${new Date().toISOString().slice(0,10)}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+  };
+  
+  html2pdf().set(opt).from(element).save();
+}
+
 function renderProducts() {
   const search = document.getElementById('productSearch').value.toLowerCase();
   const box = document.getElementById('productsGrid');
-  let list = allProducts.filter(p => (p.title?.ar||p.title?.tr||p.name).toLowerCase().includes(search));
+  let list = allProducts.filter(p => (p.title?.ar||p.title?.tr||'').toLowerCase().includes(search));
+  
   if(!list.length) return box.innerHTML = '<p style="grid-column:1/-1;text-align:center;">لا توجد منتجات</p>';
   
   box.innerHTML = list.map(p => {
     const final = p.discount > 0 ? p.price * (1 - p.discount/100) : p.price;
-    const t = p.title?.ar || p.title?.tr || p.name;
     return `
     <div class="product-card">
-      <img src="${p.image||'https://via.placeholder.com/200'}" class="p-img">
+      <img src="${p.image||'https://via.placeholder.com/300'}" class="p-img">
       <div class="p-info">
-        <div class="p-title">${t}</div>
-        <div class="p-price">₺ ${final.toFixed(2)}</div>
-        <div class="p-stock ${p.inStock?'in':'out'}">${p.inStock?'✅ متوفر':'❌ غير متوفر'}</div>
+        <div class="p-title">${p.title?.ar || p.name}</div>
+        <div class="p-price">₺ ${final.toFixed(2)} ${p.discount>0?`(-${p.discount}%)`:''}</div>
+        <div class="p-stock ${p.inStock?'in':'out'}">${p.inStock?'✓ متوفر':'✗ غير متوفر'}</div>
         <div class="p-actions">
           <button class="btn-edit" onclick="openProductModal('${p.id}')">✏️ تعديل</button>
-          <button class="btn-del" onclick="delProduct('${p.id}')">🗑️ حذف</button>
+          <button class="btn-del-p" onclick="delProduct('${p.id}')">🗑️ حذف</button>
         </div>
       </div>
     </div>`;
@@ -330,8 +415,8 @@ function renderProducts() {
 
 function renderReminders() {
   const body = document.getElementById('remindersBody');
-  if(!allReminders.length) return body.innerHTML = '<tr><td colspan="3" style="text-align:center;">لا يوجد</td></tr>';
-  body.innerHTML = allReminders.map(r => `<tr><td>${r.productName}</td><td style="color:var(--gold);">${r.email}</td><td>${r.createdAt?new Date(r.createdAt.toDate()).toLocaleDateString('ar-EG'):''}</td></tr>`).join('');
+  if(!allReminders.length) return body.innerHTML = '<tr><td colspan="3" style="text-align:center;">لا توجد تذكيرات</td></tr>';
+  body.innerHTML = allReminders.map(r => `<tr><td>${r.productName}</td><td style="color:var(--accent);font-weight:700;">${r.contact}</td><td>${r.createdAt?new Date(r.createdAt.toDate()).toLocaleDateString('ar-EG'):''}</td></tr>`).join('');
 }
 
 function openProductModal(id=null) {
@@ -339,7 +424,7 @@ function openProductModal(id=null) {
   document.getElementById('editId').value = '';
   if(id) {
     const p = allProducts.find(x=>x.id===id);
-    document.getElementById('modalTitle').innerText = "تعديل";
+    document.getElementById('modalTitle').innerText = "تعديل المنتج";
     document.getElementById('editId').value = p.id;
     document.getElementById('pNameTr').value = p.title?.tr || p.name;
     document.getElementById('pNameAr').value = p.title?.ar || '';
@@ -349,8 +434,10 @@ function openProductModal(id=null) {
     document.getElementById('pDiscount').value = p.discount;
     document.getElementById('pImage').value = p.image;
     document.getElementById('pDesc').value = p.desc;
+    document.getElementById('pInStock').checked = p.inStock !== false;
   } else {
     document.getElementById('modalTitle').innerText = "إضافة منتج";
+    document.getElementById('pInStock').checked = true;
   }
   document.getElementById('productModal').classList.add('open');
 }
@@ -371,25 +458,20 @@ async function saveProduct(e) {
     discount: parseFloat(document.getElementById('pDiscount').value)||0,
     image: document.getElementById('pImage').value,
     desc: document.getElementById('pDesc').value,
-    inStock: true
+    inStock: document.getElementById('pInStock').checked
   };
-  if(id) await db.collection('products').doc(id).update(data);
-  else {
+  
+  if(id) {
+    await db.collection('products').doc(id).update(data);
+  } else {
     data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
     await db.collection('products').add(data);
   }
   closeModal();
 }
-async function delProduct(id) { if(confirm("حذف؟")) await db.collection('products').doc(id).delete(); }
 
-function exportPDF() {
-  if(!allOrders.length) return alert("لا يوجد طلبات");
-  const el = document.createElement('div');
-  el.style.cssText = "padding:20px;font-family:Cairo;direction:rtl;background:#fff;";
-  let h = `<h2 style="text-align:center;">تقرير الطلبات</h2><table style="width:100%;border-collapse:collapse;text-align:right;"><tr style="background:#eee;"><th>رقم</th><th>الاسم</th><th>الهاتف</th><th>الإجمالي</th></tr>`;
-  allOrders.forEach(o => h += `<tr><td style="border:1px solid #ccc;padding:10px;">${o.id.slice(-6)}</td><td style="border:1px solid #ccc;padding:10px;">${o.name}</td><td style="border:1px solid #ccc;padding:10px;">${o.phone}</td><td style="border:1px solid #ccc;padding:10px;">${o.total}</td></tr>`);
-  el.innerHTML = h + '</table>';
-  html2pdf().from(el).save();
+async function delProduct(id) { 
+  if(confirm("تأكيد حذف المنتج؟")) await db.collection('products').doc(id).delete(); 
 }
 </script>
 </body>
