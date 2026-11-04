@@ -2,14 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Miraç Admin — لوحة التحكم</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<!-- مكتبة تصدير PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
@@ -18,110 +16,108 @@
   --text: #334155; --muted: #64748b; --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-body { background: var(--bg); color: var(--text); min-height: 100vh; }
+body { background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; max-width: 100vw; overflow-x: hidden; }
 
 /* Login */
-#loginScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--primary); }
-.login-box { background: var(--card); border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); text-align: center; }
-.login-box h1 { font-size: 24px; font-weight: 900; color: var(--primary); margin-bottom: 20px; }
-.login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; background: #f8fafc; }
-.login-box button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.2s; }
-.login-box button:hover { background: #2563eb; }
+#loginScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--primary); padding: 15px;}
+.login-box { background: var(--card); border-radius: 16px; padding: 30px 20px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); text-align: center; }
+.login-box h1 { font-size: 22px; font-weight: 900; color: var(--primary); margin-bottom: 20px; }
+.login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; background: #f8fafc; font-size: 15px;}
+.login-box button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; }
 .login-err { color: var(--red); font-size: 13px; margin-top: 10px; font-weight: 700; }
 
 /* Dashboard */
 #dashboard { display: none; }
-.topbar { background: var(--card); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
-.topbar h1 { font-size: 20px; font-weight: 900; color: var(--primary); }
+.topbar { background: var(--card); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
+.topbar h1 { font-size: 18px; font-weight: 900; color: var(--primary); }
 .topbar h1 span { color: var(--accent); }
-.logout-btn { padding: 8px 16px; background: #fee2e2; color: var(--red); border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-.logout-btn:hover { background: var(--red); color: white; }
+.logout-btn { padding: 6px 12px; background: #fee2e2; color: var(--red); border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px;}
 
-.container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-.tabs { display: flex; background: var(--card); border-radius: 12px; padding: 6px; gap: 6px; margin-bottom: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-.tab-btn { flex: 1; padding: 12px; border: none; background: transparent; font-weight: 700; font-size: 15px; color: var(--muted); border-radius: 8px; cursor: pointer; transition: 0.2s; }
+.container { max-width: 1200px; margin: 15px auto; padding: 0 10px; }
+.tabs { display: flex; background: var(--card); border-radius: 12px; padding: 5px; gap: 5px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); flex-wrap: wrap;}
+.tab-btn { flex: 1; padding: 10px 5px; border: none; background: transparent; font-weight: 700; font-size: 13px; color: var(--muted); border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap;}
 .tab-btn.active { background: var(--primary); color: white; }
-.view { display: none; animation: fadeIn 0.3s; }
+.view { display: none; }
 .view.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Toolbar */
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
-.search-box { flex: 1; min-width: 250px; position: relative; }
-.search-box input { width: 100%; padding: 12px 40px 12px 15px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; }
-.search-box::before { content: '🔍'; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); }
-.btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; font-family: inherit; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; flex-wrap: wrap; }
+.search-box { flex: 1; min-width: 100%; position: relative; }
+.search-box input { width: 100%; padding: 10px 35px 10px 15px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px;}
+.search-box::before { content: '🔍'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 14px;}
+.btn { padding: 10px 15px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; font-family: inherit; font-size: 14px; width: 100%;}
 .btn-pdf { background: #fef2f2; color: var(--red); border: 1px solid #fca5a5; }
-.btn-pdf:hover { background: var(--red); color: white; }
 .btn-add { background: var(--primary); color: white; }
-.btn-add:hover { background: #1e293b; }
 
 /* Orders */
-.order-card { background: var(--card); border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 16px; border: 1px solid var(--border); overflow: hidden; }
-.order-header { background: #f1f5f9; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-.order-id { font-weight: 900; color: var(--primary); }
-.order-date { font-size: 12px; color: var(--muted); }
-.order-body { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.order-details-col p { margin-bottom: 10px; font-size: 14px; }
-.order-details-col p strong { color: var(--muted); font-size: 12px; display: block; }
-.order-items-col { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed var(--border); }
-.item-line { display: flex; justify-content: space-between; font-size: 13px; padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.order-card { background: var(--card); border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 15px; border: 1px solid var(--border); overflow: hidden; }
+.order-header { background: #f1f5f9; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 5px;}
+.order-id { font-weight: 900; color: var(--primary); font-size: 14px;}
+.order-date { font-size: 11px; color: var(--muted); }
+.order-body { padding: 15px; display: grid; grid-template-columns: 1fr; gap: 15px; }
+.order-details-col p { margin-bottom: 8px; font-size: 13px; }
+.order-details-col p strong { color: var(--muted); font-size: 11px; display: block; }
+.order-items-col { background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed var(--border); }
+.item-line { display: flex; justify-content: space-between; font-size: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 6px; flex-wrap: wrap;}
 .item-line:last-child { border: none; margin: 0; padding: 0; }
-.order-footer { padding: 15px 20px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-.total-box { font-size: 16px; font-weight: 900; color: var(--green); }
-.action-btns { display: flex; gap: 10px; }
-.wa-btn { padding: 8px 16px; background: #25d366; color: white; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; border: none; cursor: pointer; }
-.wa-btn:hover { background: #128c7e; }
-.del-btn { padding: 8px 16px; background: #fee2e2; color: var(--red); border: 1px solid #fca5a5; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-.del-btn:hover { background: var(--red); color: white; }
+.order-footer { padding: 12px 15px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+.total-box { font-size: 15px; font-weight: 900; color: var(--green); text-align: center;}
+.action-btns { display: flex; gap: 8px; width: 100%;}
+.wa-btn { flex:1; padding: 10px; background: #25d366; color: white; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: none; }
+.del-btn { flex:1; padding: 10px; background: #fee2e2; color: var(--red); border: 1px solid #fca5a5; border-radius: 8px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;}
 
 /* Products */
-.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+.products-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
 .product-card { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border); }
 .p-img { width: 100%; height: 180px; object-fit: cover; border-bottom: 1px solid var(--border); }
-.p-info { padding: 15px; }
-.p-title { font-weight: 800; margin-bottom: 5px; color: var(--primary); }
-.p-price { color: var(--gold); font-weight: 900; margin-bottom: 10px; }
-.p-stock { font-size: 12px; font-weight: 700; margin-bottom: 15px; }
+.p-info { padding: 12px; }
+.p-title { font-weight: 800; margin-bottom: 5px; color: var(--primary); font-size: 15px;}
+.p-price { color: var(--gold); font-weight: 900; margin-bottom: 8px; font-size: 16px;}
+.p-stock { font-size: 12px; font-weight: 700; margin-bottom: 10px; }
 .p-stock.in { color: var(--green); }
 .p-stock.out { color: var(--red); }
-.p-actions { display: flex; gap: 10px; }
-.p-actions button { flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.2s; }
+.p-actions { display: flex; gap: 8px; }
+.p-actions button { flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 12px;}
 .btn-edit { background: #e0f2fe; color: #0284c7; }
-.btn-edit:hover { background: #0284c7; color: white; }
 .btn-del-p { background: #fee2e2; color: var(--red); }
-.btn-del-p:hover { background: var(--red); color: white; }
 
 /* Table */
 .table-wrap { background: var(--card); border-radius: 12px; box-shadow: var(--shadow); overflow-x: auto; border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; text-align: right; }
-th { background: #f8fafc; padding: 15px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); }
-td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+table { width: 100%; border-collapse: collapse; text-align: right; min-width: 500px;}
+th { background: #f8fafc; padding: 12px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); font-size: 12px;}
+td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 12px;}
 
 /* Modal */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 15px; }
 .modal.open { display: flex; }
-.modal-content { background: var(--card); border-radius: 16px; padding: 30px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
-.modal-content h2 { margin-bottom: 20px; color: var(--primary); }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group.full { grid-column: 1 / -1; }
-.form-group label { font-size: 13px; font-weight: 700; color: var(--muted); }
-.form-group input, .form-group select, .form-group textarea { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+.modal-content { background: var(--card); border-radius: 16px; padding: 20px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+.modal-content h2 { margin-bottom: 15px; color: var(--primary); font-size: 18px;}
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px;}
 .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
-.checkbox-group input { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
-.checkbox-group label { font-size: 15px; font-weight: 700; color: var(--primary); cursor: pointer; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
-.btn-cancel { padding: 10px 20px; background: #f1f5f9; color: var(--muted); border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
-.btn-save { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.checkbox-group input { width: 18px; height: 18px; cursor: pointer; }
+.checkbox-group label { font-size: 14px; font-weight: 700; color: var(--primary); cursor: pointer; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.btn-cancel { padding: 10px 15px; background: #f1f5f9; color: var(--muted); border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%;}
+.btn-save { padding: 10px 15px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%;}
 
-@media (max-width: 768px) {
-  .order-body { grid-template-columns: 1fr; }
-  .form-grid { grid-template-columns: 1fr; }
-  .tabs { flex-direction: column; }
-  .toolbar { flex-direction: column; align-items: stretch; }
-  .action-btns { justify-content: space-between; width: 100%; }
+/* --- إعدادات الجوال (Mobile Responsive) --- */
+@media (min-width: 600px) {
+  .search-box { min-width: 250px; width: auto; }
+  .btn { width: auto; }
+  .tabs { flex-wrap: nowrap; }
+  .tab-btn { font-size: 15px; }
+  .order-body { grid-template-columns: 1fr 1fr; }
+  .order-footer { flex-direction: row; justify-content: space-between; }
+  .action-btns { width: auto; }
+  .total-box { text-align: right; }
+  .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .form-group.full { grid-column: 1 / -1; }
+  .modal-actions { justify-content: flex-end; }
+  .btn-cancel, .btn-save { width: auto; }
 }
 </style>
 </head>
@@ -140,7 +136,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 <div id="dashboard">
   <div class="topbar">
     <h1>لوحة <span>معراج</span></h1>
-    <button class="logout-btn" onclick="logoutAdmin()">تسجيل الخروج 🚪</button>
+    <button class="logout-btn" onclick="logoutAdmin()">خروج 🚪</button>
   </div>
   
   <div class="container">
@@ -153,7 +149,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
     <!-- الطلبات -->
     <div id="view-orders" class="view active">
       <div class="toolbar">
-        <div class="search-box"><input type="text" id="orderSearch" placeholder="ابحث بالاسم أو رقم الطلب..." onkeyup="renderOrders()"></div>
+        <div class="search-box"><input type="text" id="orderSearch" placeholder="ابحث بالاسم..." onkeyup="renderOrders()"></div>
         <button class="btn btn-pdf" onclick="exportPDF()">📄 تصدير PDF</button>
       </div>
       <div id="ordersList"></div>
@@ -163,7 +159,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
     <div id="view-products" class="view">
       <div class="toolbar">
         <div class="search-box"><input type="text" id="productSearch" placeholder="ابحث عن منتج..." onkeyup="renderProducts()"></div>
-        <button class="btn btn-add" onclick="openProductModal()">➕ إضافة منتج جديد</button>
+        <button class="btn btn-add" onclick="openProductModal()">➕ إضافة منتج</button>
       </div>
       <div class="products-grid" id="productsGrid"></div>
     </div>
@@ -180,7 +176,6 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
   </div>
 </div>
 
-<!-- Modal إضافة/تعديل منتج -->
 <div class="modal" id="productModal">
   <div class="modal-content">
     <h2 id="modalTitle">إضافة منتج</h2>
@@ -198,7 +193,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
         
         <div class="form-group full checkbox-group">
           <input type="checkbox" id="pInStock" checked>
-          <label for="pInStock">المنتج متوفر في المخزون حالياً</label>
+          <label for="pInStock">المنتج متوفر</label>
         </div>
       </div>
       <div class="modal-actions">
@@ -222,8 +217,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// يطلب تسجيل الدخول في كل مرة
-auth.setPersistence(firebase.auth.Auth.Persistence.NONE);
+auth.setPersistence(firebase.auth.Auth.Persistence.NONE); // يطلب دخول كل مرة
 
 let allOrders = [], allProducts = [], allReminders = [];
 
@@ -279,7 +273,7 @@ function renderOrders() {
   const box = document.getElementById('ordersList');
   let list = allOrders.filter(o => (o.name||'').toLowerCase().includes(search) || o.id.includes(search));
   
-  if(!list.length) return box.innerHTML = '<p style="text-align:center;padding:30px;color:var(--muted);">لا توجد طلبات</p>';
+  if(!list.length) return box.innerHTML = '<p style="text-align:center;padding:20px;">لا توجد طلبات</p>';
   
   box.innerHTML = list.map(o => {
     const date = o.createdAt ? new Date(o.createdAt.toDate()).toLocaleString('ar-EG') : '';
@@ -299,10 +293,10 @@ function renderOrders() {
       </div>
       <div class="order-body">
         <div class="order-details-col">
-          <p><strong>الاسم</strong>${o.name}</p>
-          <p><strong>الهاتف</strong><span style="direction:ltr; display:inline-block;">${o.phone}</span></p>
-          <p><strong>العنوان</strong>${o.city} - ${o.address}</p>
-          ${o.notes ? `<p><strong>ملاحظات</strong>${o.notes}</p>` : ''}
+          <p><strong>الاسم:</strong> ${o.name}</p>
+          <p><strong>الهاتف:</strong> <span style="direction:ltr; display:inline-block;">${o.phone}</span></p>
+          <p><strong>العنوان:</strong> ${o.city} - ${o.address}</p>
+          ${o.notes ? `<p><strong>ملاحظات:</strong> ${o.notes}</p>` : ''}
         </div>
         <div class="order-items-col">
           ${items}
@@ -319,22 +313,16 @@ function renderOrders() {
   }).join('');
 }
 
-// --- دالة حذف الطلب ---
 async function deleteOrder(id) {
   if(confirm("هل أنت متأكد من حذف هذا الطلب نهائياً؟")) {
-    try {
-      await db.collection('orders').doc(id).delete();
-    } catch (error) {
-      alert("حدث خطأ أثناء الحذف: " + error.message);
-    }
+    try { await db.collection('orders').doc(id).delete(); } 
+    catch (error) { alert("حدث خطأ: " + error.message); }
   }
 }
 
-// --- دالة تصدير PDF ---
 function exportPDF() {
   if(!allOrders.length) return alert("لا توجد طلبات لتصديرها.");
   
-  // إنشاء عنصر HTML مؤقت لتصميم الجدول
   const element = document.createElement('div');
   element.style.cssText = "padding:20px; font-family:'Cairo', sans-serif; direction:rtl; background:#fff; color:#000; width: 1000px;";
   
