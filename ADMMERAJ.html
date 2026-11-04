@@ -103,14 +103,14 @@ td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 12px;}
 .btn-cancel { padding: 10px 15px; background: #f1f5f9; color: var(--muted); border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%;}
 .btn-save { padding: 10px 15px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%;}
 
-/* --- إعدادات الجوال (Mobile Responsive) --- */
+/* --- الشاشات الكبيرة (لابتوب/تابلت) --- */
 @media (min-width: 600px) {
   .search-box { min-width: 250px; width: auto; }
   .btn { width: auto; }
   .tabs { flex-wrap: nowrap; }
   .tab-btn { font-size: 15px; }
   .order-body { grid-template-columns: 1fr 1fr; }
-  .order-footer { flex-direction: row; justify-content: space-between; }
+  .order-footer { flex-direction: row; justify-content: space-between; align-items: center; }
   .action-btns { width: auto; }
   .total-box { text-align: right; }
   .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
@@ -146,7 +146,6 @@ td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 12px;}
       <button class="tab-btn" onclick="switchTab('reminders', this)">🔔 التذكيرات</button>
     </div>
 
-    <!-- الطلبات -->
     <div id="view-orders" class="view active">
       <div class="toolbar">
         <div class="search-box"><input type="text" id="orderSearch" placeholder="ابحث بالاسم..." onkeyup="renderOrders()"></div>
@@ -155,7 +154,6 @@ td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 12px;}
       <div id="ordersList"></div>
     </div>
 
-    <!-- المنتجات -->
     <div id="view-products" class="view">
       <div class="toolbar">
         <div class="search-box"><input type="text" id="productSearch" placeholder="ابحث عن منتج..." onkeyup="renderProducts()"></div>
@@ -164,7 +162,6 @@ td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 12px;}
       <div class="products-grid" id="productsGrid"></div>
     </div>
 
-    <!-- التذكيرات -->
     <div id="view-reminders" class="view">
       <div class="table-wrap">
         <table>
